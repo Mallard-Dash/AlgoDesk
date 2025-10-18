@@ -4,10 +4,21 @@
 import time
 import datetime
 import sqlite3
+import login
+import os
+from users import User
+
+#Tell the program where to put the database-file
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_DIR = os.path.join(BASE_DIR, "data")
+os.makedirs(DB_DIR, exist_ok=True)
+DB_PATH = os.path.join(DB_DIR, "Users.db")
 
 class Main():
-    def __init__(self):
-        pass
+    def __init__(self, user_session_object):
+        self.current_user = user_session_object
+        print(f"---Logged in as: {self.current_user} ---")
+
         
     def show_main_menu(self):
         while True:
@@ -17,10 +28,10 @@ class Main():
                 "3. Order menu\n",
                 "4. Active derivates\n",
                 "5. Log off")
-            menu_choice = (f"Please enter a menu-choice: ")
+            menu_choice = input(f"Please enter a menu-choice: ")
             match menu_choice:
                 case "1":
-                    pass
+                    self.current_user.check_user_balance()
                 case "2":
                     pass 
                 case "3":
@@ -28,19 +39,58 @@ class Main():
                 case "4":
                     pass
                 case "5":
-                    pass
+                    break
 
     def fetch_API(self):
         pass
 
-    def create__user_database(self, db_name):
-        db_name = input("Please enter a name for new database: ")
-        conn = sqlite3.connect(f"{db_name}")
-        cursor = conn.cursor()
-        cursor.execute(f"CREATE TABLE {db_name}(name, email, password, account_no)")
+    def create_user_database(self):
+            
+            # Connect (this creates the file if it's new)
+            conn = sqlite3.connect(DB_PATH)
+            cursor = conn.cursor()
+
+            # Create the 'USERS' table (IF NOT EXISTS prevents errors)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS USERS (
+                    name TEXT, 
+                    email TEXT, 
+                    password TEXT, 
+                    account_no INTEGER, 
+                    capital REAL
+                )
+            """)
+
+            # Commit (save) the changes
+            conn.commit()
+            
+            # Close the connection
+            conn.close()
+            
+            print(f"Database 'Users.db' and table 'USERS' created successfully.")
 
     def get_timestamp(self):
-        time_data = datetime.datetime.now()
-        time_h = time_data("%H")
-        time_m = time_data("%M")
-        date = date()
+            time_data = datetime.datetime.now()
+            
+            time_h = time_data.strftime("%H")
+            time_m = time_data.strftime("%M")
+            
+            date = time_data.date()
+            
+            print(f"Date: {date}, Time: {time_h}:{time_m}")
+            return time_data 
+
+if __name__ == "__main__":
+    
+    while True:
+        # This returns a User object or False
+        login_result = login.show_login_menu() 
+
+        if login_result == False:
+            break # User choose "Exit"
+        
+        # Check if login_result is a User object (not None or False)
+        if isinstance(login_result, User):
+            # Pass the entire User object into the Main class
+            main_app = Main(user_session_object=login_result) 
+            main_app.show_main_menu()
