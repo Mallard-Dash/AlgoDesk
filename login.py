@@ -6,6 +6,7 @@ from users import User
 import os
 import time
 import sqlite3
+import pwinput
 
 #Tell the program where to put the database-file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -17,7 +18,7 @@ DB_PATH = os.path.join(DB_DIR, "Users.db")
 def login_existing_user():
     print("*** LOGIN PAGE ***")
     name = input("Username: ")
-    password = input("Password: ")
+    password = pwinput.pwinput(prompt="Password: ", mask='*')
 
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()

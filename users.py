@@ -6,6 +6,7 @@ import datetime
 import sqlite3
 import random
 import os
+import pwinput
 
 #Tell the program where to put the database-file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -93,8 +94,8 @@ class User:
             return False #False means that we can't add another user with the same name = RED light
 
     def password_is_ok(self):
-        self.password = input("Enter a password: ")
-        pwd_check = input("Enter the same password again: ")
+        self.password = pwinput.pwinput(prompt="Enter a password: ", mask='*')
+        pwd_check = pwinput.pwinput(prompt="Enter the same password again: ", mask='*')
         pwd_match = False
                 
         if self.password != pwd_check:

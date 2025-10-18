@@ -1,0 +1,10 @@
+Ticker	    Company /Asset	        Category
+-------------------------------------------------------------------
+AAPL	      Apple Inc.	            Big Tech Stock
+NVDA	      Nvidia Corp.	            AI/Semiconductor Stock
+MSFT	      Microsoft Corp.	        Software Stock
+SPY	S&P 500   ETF Broad Market          (Tracks the top 500 US companies)
+GLD	          SPDR Gold Shares	        Commodity (Tracks the price of gold)
+USO	          United States Oil Fund	Commodity (Tracks the price of oil)
+JPM	          JPMorgan Chase & Co.    	Finance/Bank Stock
+BTC-USD	      Bitcoin	                Cryptocurrency
