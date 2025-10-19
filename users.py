@@ -121,22 +121,9 @@ class User:
             if result:
                 print(f"Your balance is {result[0]} SEK")
                 input("Press ENTER to return to main-menu...")
-                return
+                balance = result
+                return balance
             else:
-                print("Error! Could not get balance.")
-                return
+                return ("Error! Could not get balance.")
+                
 
-    def logout_user():
-        pass
-
-    def user_session():
-        pass
-
-    def show_user_account_amount():
-        pass
-
-    def is_logged_in():
-        pass
-
-    def can_afford_derivate():
-        pass

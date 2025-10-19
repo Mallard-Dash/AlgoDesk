@@ -8,6 +8,7 @@ import login
 import os
 import pwinput
 from users import User
+from orders import Order_engine
 import textual_dev as tx
 
 #Tell the program where to put the database-file
@@ -17,8 +18,9 @@ os.makedirs(DB_DIR, exist_ok=True)
 DB_PATH = os.path.join(DB_DIR, "Users.db")
 
 class Main():
-    def __init__(self, user_session_object):
+    def __init__(self, user_session_object, order_engine_object):
         self.current_user = user_session_object
+        self.order = order_engine_object
         print(f"---Logged in as: {self.current_user} ---")
 
         
@@ -37,7 +39,7 @@ class Main():
                 case "2":
                     pass 
                 case "3":
-                    pass
+                    self.order.show_order_menu()
                 case "4":
                     pass
                 case "5":
@@ -61,14 +63,17 @@ class Main():
 if __name__ == "__main__":
     
     while True:
-        # This returns a User object or False
+        # 1. This returns a User object or False
         login_result = login.show_login_menu() 
 
         if login_result == False:
             break # User choose "Exit"
         
-        # Check if login_result is a User object (not None or False)
         if isinstance(login_result, User):
-            # Pass the entire User object into the Main class
-            main_app = Main(user_session_object=login_result) 
+            
+            order_app = Order_engine(current_user_object=login_result)
+            
+            main_app = Main(user_session_object=login_result, 
+                            order_engine_object=order_app) 
+
             main_app.show_main_menu()
