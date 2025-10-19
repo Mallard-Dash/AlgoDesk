@@ -7,6 +7,7 @@ import sqlite3
 import random
 import os
 import pwinput
+import textual_dev as tx
 
 #Tell the program where to put the database-file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -48,12 +49,16 @@ class User:
                 continue
             else:
                 print("Password OK!")
-                account_no = self.generate_account_number()
+                account_id = self.generate_account_number()
                 capital = 100000
 
-                data = (self.name, self.email, self.password, account_no, capital)
+                data = (account_id, self.name, self.email, self.password, capital)
+                sql_query = """
+                INSERT INTO Users (account_id, name, email, password, capital) 
+                VALUES (?, ?, ?, ?, ?);
+                """
                 cur = con.cursor()
-                cur.execute("INSERT INTO USERS VALUES(?,?,?,?,?)",data)
+                cur.execute(sql_query, data)
                 con.commit()
                 print(f"User {self.name} created!")
                 return
@@ -62,25 +67,26 @@ class User:
 
     def generate_account_number(self):
         while True:
-            account_no = (random.randint(100,999))
+            account_id = (random.randint(100000,999999))
             cur = con.cursor()
-            cur.execute("SELECT account_no FROM Users WHERE account_no = ?", (account_no,))
-            account_no_exist_not = cur.fetchone()
+            cur.execute("SELECT account_id FROM Users WHERE account_id = ?", (account_id,))
+            account_id_exist_not = cur.fetchone()
 
-            if account_no_exist_not == None:
-                return account_no
+            if account_id_exist_not == None:
+                return account_id
             else:
                 continue
 
     def check_if_name_is_taken(self):
-        cur = con.cursor()
-        cur.execute("SELECT name FROM Users WHERE name = ?", (self.name, ))
-        name_exist = cur.fetchone()
+        with sqlite3.connect(DB_PATH) as con:
+                cur = con.cursor()
+                cur.execute("SELECT name FROM Users WHERE name = ?", (self.name, ))
+                name_exist = cur.fetchone()
 
-        if name_exist == None:
-            return True #True means that it does not exist a user with that name = Green light
-        else:
-            return False #RED light
+                if name_exist is None:
+                    return True # True = name is NOT taken (it's available)
+                else:
+                    return False # False = name IS taken (it's not available)
 
     def check_if_email_is_taken(self):
         cur = con.cursor()

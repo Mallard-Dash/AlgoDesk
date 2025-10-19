@@ -8,6 +8,7 @@ import login
 import os
 import pwinput
 from users import User
+import textual_dev as tx
 
 #Tell the program where to put the database-file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -45,30 +46,6 @@ class Main():
     def fetch_API(self):
         pass
 
-    def create_user_database(self):
-            
-            # Connect (this creates the file if it's new)
-            conn = sqlite3.connect(DB_PATH)
-            cursor = conn.cursor()
-
-            # Create the 'USERS' table (IF NOT EXISTS prevents errors)
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS USERS (
-                    name TEXT, 
-                    email TEXT, 
-                    password TEXT, 
-                    account_no INTEGER, 
-                    capital REAL
-                )
-            """)
-
-            # Commit (save) the changes
-            conn.commit()
-            
-            # Close the connection
-            conn.close()
-            
-            print(f"Database 'Users.db' and table 'USERS' created successfully.")
 
     def get_timestamp(self):
             time_data = datetime.datetime.now()

@@ -6,24 +6,34 @@ import datetime
 import os
 import yfinance as yf
 from colorama import Fore, init
+import textual_dev as tx
 red = Fore.RED
 green = Fore.GREEN
 blue = Fore.BLUE
 mag = Fore.MAGENTA
 yel = Fore.YELLOW
 
+AAPL_TICKER = yf.ticker("AAPL")
+stock_info_AAPL = AAPL_TICKER.info
+MSFT_TICKER = yf.ticker("MSFT")
+stock_info_MSFT = MSFT_TICKER.info
+SPY500_TICKER = yf.ticker("SPY S&P 500")
+stock_info_SPY500 = SPY500_TICKER.info
+GLD_TICKER = yf.ticker("GLD")
+stock_info_GLD = GLD_TICKER.info
+USO_TICKER = yf.ticker("USO")
+stock_info_USO = USO_TICKER.info
+JPM_TICKER = yf.ticker("JPM")
+stock_info_JPM = JPM_TICKER.info
+BTCUSD_TICKER = yf.ticker("BTC-USD")
+stock_info_BTCUSD = BTCUSD_TICKER.info
+
 class Order_engine():
     def __init__(self, user, kind, transaction_no): #long/short?
         self.user = user
         self.kind = kind
-        self.transaction_no = transaction_no
+        self.transaction_no = transaction_no        
 
-    def buy_order_mem(self):
-        buy_mem_dict = {"Ticker": self.ticker,
-                        "Position": self.position,
-                        "transaction_no": self.transaction_no,
-                        "cost": self.cost,
-                        "ammount": self.ammount}
 
     def show_order_menu(self):
         order_menu = True
@@ -62,28 +72,70 @@ class Order_engine():
                 f"{blue}|------------------------------------------------------------------------------|")
 
 
-            ticker = input("What ticker do you want to buy? Choose with the numbers listed to the left (To exit, press 9): ")
+            self.ticker = input("What ticker do you want to buy? Choose with the numbers listed to the left (To exit, press 9): ")
             match ticker:
                 case "1":
-                    pass
+                    self.ticker = "AAPL"
                 case "2":
-                    pass
+                    self.ticker = "NVDA"
                 case "3":
-                    pass
+                    self.ticker = "MSFT"
                 case "4":
-                    pass
+                    self.ticker = "SPY"
                 case "5":
-                    pass
+                    self.ticker = "GLD"
                 case "6":
-                    pass
+                    self.ticker = "USO"
                 case "7":
-                    pass
+                    self.ticker = "JPM"
                 case "8":
-                    pass
+                    self.ticker = "BTC-USD"
                 case "9":
-                    break
+                    print("Back to order-menu...")
+                    time.sleep(1.5)
+                    self.show_order_menu()
+
+            sql_query = """
+            INSERT INTO Transactions (user_account_id, ticker, type, quantity, price_per_share)
+            VALUES (?, ?, ?, ?, ?)
+            """
+            data = (
+                    self.user_account_id,
+                    self.ticker,
+                    self.type,
+                    self.quantity,
+                    self.price_per_share,
+                    self.timestamp)
+
+            cur = con.cursor()
+            cur.execute(sql_query, data)
+            con.commit()
 
 
+    def buy_position(self):
+        try:
+            kind = str(input(f"Would you like a long or short position in {self.ticker}? (long/short)"))
+        except ValueError:
+            print("Wrong value-input!")
+            continue
+        if kind.upper() == "long":
+            self.type = kind
+            return
+        elif kind.upper() == "short":
+            self.type = kind
+            return
+        else:
+            print("Please choose either a long or short position: ")
+
+    def quantity(self):
+        quantity = int(input(f"How many shares of {self.ticker} would you like to buy?"))
+
+
+    def buy_cost(self):
+        pass
+
+    def buy_ammount(self):
+        pass
 
     def place_sell_order():
         pass
@@ -125,4 +177,25 @@ class Order_engine():
         pass
 
     def kind_of_ticker():
-        pass
+        self.ticker = input("What ticker do you want to buy? Choose with the numbers listed to the left (To exit, press 9): ")
+        match ticker:
+                case "1":
+                    self.ticker = "AAPL"
+                case "2":
+                    self.ticker = "NVDA"
+                case "3":
+                    self.ticker = "MSFT"
+                case "4":
+                    self.ticker = "SPY"
+                case "5":
+                    self.ticker = "GLD"
+                case "6":
+                    self.ticker = "USO"
+                case "7":
+                    self.ticker = "JPM"
+                case "8":
+                    self.ticker = "BTC-USD"
+                case "9":
+                    print("Back to order-menu...")
+                    time.sleep(1.5)
+                    self.show_order_menu()

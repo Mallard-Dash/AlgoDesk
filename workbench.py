@@ -6,6 +6,7 @@ green = Fore.GREEN
 blue = Fore.BLUE
 mag = Fore.MAGENTA
 yel = Fore.YELLOW
+import textual_dev as tx
 
 
 print(f"{mag} |------------------------------------------------------------------------------|\n"
