@@ -21,4 +21,6 @@ The goal is to build a flexible platform for experimenting with trading logic, p
 
 This project is actively evolving and updated continuously, with no defined end date.
 
+I want to thank the user 'nitinsogex' for noticing that login.py could have improvements. The user made a pull-request, i reviewed and accepted it. Thank you 'nitinsogex'
+
 Copyright Mallard-Dash 2025
