@@ -9,10 +9,8 @@ import os
 import pwinput
 import textual_dev as tx
 
-#Tell the program where to put the database-file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_DIR = os.path.join(BASE_DIR, "data")
-os.makedirs(DB_DIR, exist_ok=True)
 DB_PATH = os.path.join(DB_DIR, "Users.db")
 
 
@@ -50,7 +48,7 @@ class User:
             else:
                 print("Password OK!")
                 account_id = self.generate_account_number()
-                capital = 100000
+                capital = 10000 #In dollars
 
                 data = (account_id, self.name, self.email, self.password, capital)
                 sql_query = """
@@ -119,11 +117,61 @@ class User:
             cur.execute("SELECT capital FROM Users WHERE name = ?", (self.name, ))
             result = cur.fetchone()
             if result:
-                print(f"Your balance is {result[0]} SEK")
+                print(f"Your balance is {result[0]} $")
                 input("Press ENTER to return to main-menu...")
                 balance = result
                 return balance
             else:
                 return ("Error! Could not get balance.")
                 
+    def update_user_balance(self, new_balance):
+        cur = con.cursor()
+        try:
+            cur.execute("UPDATE Users SET capital = ? WHERE name = ?", (new_balance, self.name))
+            con.commit()
+            return True
+        except sqlite3.Error as e:
+            print(f"Database error while updating balance: {e}")
+            return False
 
+    # assume User has attributes: user_id (int) and capital (float)
+    def save(self, con: sqlite3.Connection | None = None):
+        """Persist current user fields (capital) to the DB."""
+        close_conn = False
+        if con is None:
+            con = sqlite3.connect(DB_PATH)
+            close_conn = True
+        try:
+            cur = con.cursor()
+
+            cur.execute(
+                "UPDATE users SET capital = ? WHERE id = ?",
+                (self.capital, self.id)
+            )
+            con.commit()
+        except sqlite3.Error as e:
+            print(f"Failed to save user: {e}")
+        finally:
+            if close_conn:
+                con.close()
+
+    def __init__(self, user_id: int, name: str, capital: float):
+        self.id = user_id
+        self.name = name
+        self.capital = capital
+
+    def save(self, con: sqlite3.Connection | None = None):
+        """Persist user's capital (and other updatable fields) to DB."""
+        close_conn = False
+        if con is None:
+            con = sqlite3.connect(DB_PATH)
+            close_conn = True
+        try:
+            cur = con.cursor()
+            cur.execute("UPDATE users SET capital = ? WHERE id = ?", (self.capital, self.id))
+            con.commit()
+        except sqlite3.Error as e:
+            print(f"Failed to save user: {e}")
+        finally:
+            if close_conn:
+                con.close()
