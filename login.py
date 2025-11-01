@@ -1,14 +1,24 @@
 #AlgoDesk 2025 Mallard-Dash
-#login.py
+#login.py (Revised with unified color style)
 
 from users import User 
 import os
 import time
 import sqlite3
 import pwinput
-import textual_dev as tx
-from colorama import Fore, init
-init()
+# import textual_dev as tx # Not used in this file
+from colorama import Fore, Style, init
+init(autoreset=True) # Use autoreset=True to match other files
+
+# --- Color Setup ---
+red = Fore.RED
+green = Fore.GREEN
+blue = Fore.BLUE
+mag = Fore.MAGENTA
+yel = Fore.YELLOW
+cyan = Fore.CYAN
+bold = Style.BRIGHT
+reset = Style.RESET_ALL
 
 # Constants
 MAX_USERNAME_LENGTH = 50
@@ -20,7 +30,7 @@ MENU_OPTIONS = {
 }
 
 # Database queries
-SELECT_USER_QUERY = "SELECT name, email, password, capital FROM USERS WHERE name = ?"
+SELECT_USER_QUERY = "SELECT account_id, name, email, password, capital FROM Users WHERE name = ?"
 
 # Tell the program where to put the database-file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -28,12 +38,12 @@ DB_DIR = os.path.join(BASE_DIR, "data")
 os.makedirs(DB_DIR, exist_ok=True)
 DB_PATH = os.path.join(DB_DIR, "Users.db")
 
-# Disclaimer text as constant
-DISCLAIMER_TEXT = f"""{Fore.RED}===================================================================
-                 AlgoDesk - Terms of Use & Disclaimer                 
+# Disclaimer text as constant (Updated colors here for consistency)
+DISCLAIMER_TEXT = f"""{red}===================================================================
+                 {bold}AlgoDesk - Terms of Use & Disclaimer{reset}{red}                 
 ===================================================================
 
-{Fore.YELLOW}1. No Financial Advice
+{yel}1. No Financial Advice
    This software, "AlgoDesk" (the "Program"), is provided for educational and
    informational purposes only. The Program and all content provided by its
    creator(s) do not constitute financial, investment, legal, or tax advice.
@@ -64,7 +74,7 @@ DISCLAIMER_TEXT = f"""{Fore.RED}================================================
    information from this Program.
 
 -------------------------------------------------------------------
-By typing "Agree" or by using this Program, you acknowledge that
+By typing "{green}{bold}AGREE{reset}{yel}" or by using this Program, you acknowledge that
 you have read, understood, and agree to be bound by these terms.
 -------------------------------------------------------------------
 """
@@ -78,37 +88,40 @@ def login_existing_user():
         User: User object if authentication successful
         None: If authentication fails or error occurs
     """
-    print("*** LOGIN PAGE ***")
-    username = input("Username: ").strip()
-    password = pwinput.pwinput(prompt="Password: ", mask='*')
+    print(f"\n{cyan}*** LOGIN PAGE ***{reset}")
+    username = input(f"{blue}Username: {reset}").strip()
+    password = pwinput.pwinput(prompt=f"{blue}Password: {reset}", mask='*')
 
     try:
         with sqlite3.connect(DB_PATH) as connection:
             cursor = connection.cursor()
             cursor.execute(SELECT_USER_QUERY, (username,))
             user_data = cursor.fetchone()
-            
-            # Check if user exists and password matches
-            if user_data and user_data[2] == password:  # user_data[2] is the password
-                print(f"Welcome, {user_data[0]}!")  # user_data[0] is the name
-                
-                # Create the User object with the data from the database
+
+            if user_data and user_data[3] == password:
+                # Success feedback
+                print(f"\n{green}{bold}✅ Welcome, {user_data[1]}! Logging in...{reset}")
+                time.sleep(1)
                 user_session = User(
-                    name=user_data[0], 
-                    email=user_data[1], 
-                    password=user_data[2], 
-                    capital=user_data[3]
+                    user_id=user_data[0],
+                    name=user_data[1],
+                    email=user_data[2],
+                    password=user_data[3],
+                    capital=user_data[4]
                 )
-                return user_session  # SUCCESS! Return the entire object
+                return user_session
             else:
-                print("Invalid username or password.")
-                return None  # FAILURE! Return None
-                
+                # Failure feedback
+                print(f"\n{red}❌ Invalid username or password.{reset}")
+                time.sleep(SLEEP_DURATION)
+                return None
     except sqlite3.Error as database_error:
-        print(f"Database error: {database_error}")
+        print(f"{red}Database error: {database_error}{reset}")
+        time.sleep(SLEEP_DURATION)
         return None
     except Exception as e:
-        print(f"An unexpected error occurred during login: {e}")
+        print(f"{red}An unexpected error occurred during login: {e}{reset}")
+        time.sleep(SLEEP_DURATION)
         return None
 
 
@@ -121,47 +134,54 @@ def show_login_menu():
         False: If user chooses to exit or agreement declined
     """
     if not disclaimer():
-        print(Fore.RED + "To use this program you need to agree on the user-terms!")
+        print(f"\n{red}{bold}To use this program you need to agree on the user-terms!{reset}")
         time.sleep(SLEEP_DURATION)
         return False
 
     while True:
         try:
-            print(f"\n***AlgoDesk-Login-Menu***\n"
-                  f"1. {MENU_OPTIONS['1']}\n"
-                  f"2. {MENU_OPTIONS['2']}\n"
-                  f"3. {MENU_OPTIONS['3']}")
+            print(f"\n{mag}=" * 30)
+            print(f"{mag}{bold}*** AlgoDesk Login Menu ***{reset}")
+            print(f"{mag}=" * 30)
             
-            menu_choice = input("Please choose a menu choice: ").strip()
+            # Nicer menu printout
+            print(f"{cyan}1. {reset}{bold}{MENU_OPTIONS['1']}{reset}")
+            print(f"{cyan}2. {reset}{bold}{MENU_OPTIONS['2']}{reset}")
+            print(f"{cyan}3. {red}{bold}{MENU_OPTIONS['3']}{reset}")
+            print("-" * 30)
+            
+            menu_choice = input(f"{blue}{bold}➤ Please choose an option (1-3): {reset}").strip()
             
             match menu_choice:
                 case "1":
-                    # user_object will be the User object or None
                     user_object = login_existing_user() 
                     if user_object is not None:
-                        return user_object  # Pass the User object up to main.py
+                        return user_object
                 
                 case "2":
+                    print(f"\n{green}{bold}*** Create New User ***{reset}")
                     try:
                         new_user_obj = User()
                         new_user_obj.new_user() 
+                        print(f"{green}Account successfully created. Please log in.{reset}")
                     except Exception as e:
-                        print(f"Error creating new user: {e}")
+                        print(f"{red}Error creating new user: {e}{reset}")
+                    time.sleep(SLEEP_DURATION)
                     continue 
                 
                 case "3":
-                    print("Turning off...Bye")
+                    print(f"{yel}Turning off... Bye!{reset}")
                     time.sleep(SLEEP_DURATION)
-                    return False  # Tell main.py to quit
+                    return False
                 
                 case _:
-                    print("Invalid choice. Please select 1, 2, or 3.")
+                    print(f"{red}Invalid choice. Please select 1, 2, or 3.{reset}")
                     
         except KeyboardInterrupt:
-            print("\n\nProgram interrupted by user.")
+            print(f"\n\n{yel}Program interrupted by user. Exiting.{reset}")
             return False
         except Exception as e:
-            print(f"An unexpected error occurred in menu: {e}")
+            print(f"{red}An unexpected error occurred in menu: {e}{reset}")
 
 
 def disclaimer():
@@ -176,22 +196,24 @@ def disclaimer():
     # This loop will run until the user gives a valid answer
     while True:
         try:
-            conditions = input(f"{Fore.WHITE}If you accept the terms, type {Fore.GREEN}AGREE.{Fore.WHITE} If not, type {Fore.RED}EXIT: {Fore.RESET}")
+            # Clearer prompt
+            conditions = input(f"{bold}{yel}Accept terms? ({green}AGREE{yel}/{red}EXIT{yel}): {reset}")
             
-            # Standardize the input
             clean_input = conditions.upper().strip()
             
             if clean_input == "AGREE":
-                return True  # Exit the loop and return True
+                print(f"\n{green}Agreement accepted. Proceeding to login menu...{reset}")
+                time.sleep(1)
+                return True
             elif clean_input == "EXIT":
-                return False  # Exit the loop and return False
+                print(f"\n{red}Agreement declined. Exiting program.{reset}")
+                return False
             else:
-                # This will re-run the loop
-                print(Fore.RED + "Invalid input. Please type 'AGREE' or 'EXIT'.\n")
+                print(f"{red}Invalid input. Please type '{green}AGREE{red}' or '{red}EXIT{red}'.{reset}\n")
                 
         except KeyboardInterrupt:
-            print("\n\nProgram interrupted by user.")
+            print(f"\n\n{yel}Program interrupted by user. Exiting.{reset}")
             return False
         except Exception as e:
-            print(f"Error in disclaimer: {e}")
+            print(f"{red}Error in disclaimer: {e}{reset}")
             return False

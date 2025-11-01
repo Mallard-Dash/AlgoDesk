@@ -1,15 +1,30 @@
 #AlgoDesk 2025 Mallard-Dash
-#main.py
+#main.py (Reviderad för att inkludera Balance Menu)
 
 import time
 import datetime
 import sqlite3
 import login
 import os
-import pwinput
+try:
+    from colorama import Fore, Style, init
+    init(autoreset=True)
+    red = Fore.RED
+    green = Fore.GREEN
+    blue = Fore.BLUE
+    mag = Fore.MAGENTA
+    yel = Fore.YELLOW
+    cyan = Fore.CYAN
+    bold = Style.BRIGHT
+    reset = Style.RESET_ALL
+except ImportError:
+    red = green = blue = mag = yel = cyan = bold = reset = ""
+
+import pwinput 
+
 from users import User
 from orders import Order_engine
-import textual_dev as tx
+# import textual_dev as tx # Inte använd i denna fil
 
 #Tell the program where to put the database-file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -22,44 +37,44 @@ class Main():
     def __init__(self, user_session_object, order_engine_object):
         self.current_user = user_session_object
         self.order = order_engine_object
-        print(f"---Logged in as: {self.current_user} ---")
+        print(f"\n{green}--- Logged in as: {self.current_user.name} ---{reset}")
 
         
     def show_main_menu(self):
         while True:
-            print("***Main menu***\n",
-                "1. Check balance\n",
-                "2. View transactions\n",
-                "3. Order menu\n",
-                "4. Active derivates\n",
-                "5. Log off")
-            menu_choice = input(f"Please enter a menu-choice: ")
+            print(f"\n{mag}=" * 30)
+            print(f"{mag}{bold}*** Main Menu ***{reset}")
+            print(f"{mag}=" * 30)
+            
+            print(f"{cyan}1. {yel}Balance Management Menu{reset} (Deposit, Withdraw, Check Balance)") 
+            print(f"{cyan}2. {green}Order Menu{reset} (Buy/Sell Stocks/Derivatives)")
+            print(f"{cyan}3. {red}Log Off{reset}")
+            print("-" * 30)
+
+            menu_choice = input(f"{blue}{bold}➤ Please enter a menu-choice: {reset}").strip()
+            
             match menu_choice:
                 case "1":
-                    self.current_user.check_user_balance()
+                    self.current_user.show_balance_menu()
                 case "2":
-                    pass 
-                case "3":
                     self.order.show_order_menu()
-                case "4":
-                    pass
-                case "5":
+                case "3":
+                    print(f"{yel}Logging off {self.current_user.name}... Goodbye!{reset}")
                     break
-
-    def fetch_API(self):
-        pass
+                case _:
+                    print(f"{red}Invalid choice, please try again.{reset}")
 
 
     def get_timestamp(self):
-            time_data = datetime.datetime.now()
-            
-            time_h = time_data.strftime("%H")
-            time_m = time_data.strftime("%M")
-            
-            date = time_data.date()
-            
-            print(f"Date: {date}, Time: {time_h}:{time_m}")
-            return time_data 
+        time_data = datetime.datetime.now()
+        
+        time_h = time_data.strftime("%H")
+        time_m = time_data.strftime("%M")
+        
+        date = time_data.date()
+        
+        print(f"Date: {date}, Time: {time_h}:{time_m}")
+        return time_data 
 
 if __name__ == "__main__":
     
